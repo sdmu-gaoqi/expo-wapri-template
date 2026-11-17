@@ -1,0 +1,15 @@
+# 与 oxfmt 的 endOfLine: "lf" 对齐：仓库内统一按 LF 存储与检出
+* text=auto eol=lf
+
+# 二进制文件不做换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.zip binary
+*.jar binary
+*.keystore binary

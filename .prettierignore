@@ -1,0 +1,7 @@
+# oxfmt 也会读取这个文件（--ignore-path 默认包含 .gitignore / .prettierignore）
+
+# 手工排版的 H5 演示页：singleAttributePerLine 会把紧凑标签摊成多行
+assets/web/
+
+# WorkBuddy 的记忆文件由助手追加写入，不参与格式检查
+.workbuddy/

@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>JSBridge Demo</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --card: #ffffff;
+        --text: #16181d;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --accent: #2563eb;
+        --accent-weak: #eff4ff;
+        --success: #15803d;
+        --danger: #dc2626;
+        --console: #0b1020;
+        --radius: 14px;
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+          'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        overflow: hidden;
+      }
+
+      /* ---------- 顶栏 ---------- */
+      .topbar {
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: calc(calc(env(safe-area-inset-top, 0px)) + 14px) 16px 12px;
+        background: rgba(255, 255, 255, 0.92);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(12px);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .logo {
+        width: 34px;
+        height: 34px;
+        flex: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .brand p {
+        margin: 0;
+        font-size: 11px;
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .status {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 500;
+        background: #f3f4f6;
+        color: var(--muted);
+      }
+
+      .status .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #9ca3af;
+      }
+
+      .status.ready {
+        background: #ecfdf3;
+        color: var(--success);
+      }
+
+      .status.ready .dot {
+        background: var(--success);
+      }
+
+      /* ---------- 内容 ---------- */
+      main {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 14px 16px 24px;
+      }
+
+      .env {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+
+      .chip {
+        padding: 3px 8px;
+        border-radius: 7px;
+        background: #fff;
+        border: 1px solid var(--border);
+        font-size: 11px;
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      section + section {
+        margin-top: 18px;
+      }
+
+      section > h2 {
+        margin: 0 0 8px 2px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.3px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      .row {
+        padding: 12px 14px;
+      }
+
+      .row + .row {
+        border-top: 1px solid #f1f2f4;
+      }
+
+      .row-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .row-title {
+        font-size: 13.5px;
+        font-weight: 500;
+      }
+
+      .row-desc {
+        margin-top: 2px;
+        font-size: 11.5px;
+        color: var(--muted);
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+
+      .controls input {
+        flex: 1;
+        min-width: 0;
+      }
+
+      input {
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #f9fafb;
+        color: var(--text);
+        font-size: 13px;
+        font-family: inherit;
+        outline: none;
+      }
+
+      input:focus {
+        border-color: #bfd3fd;
+        background: #fff;
+      }
+
+      input.mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+      }
+
+      button {
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        white-space: nowrap;
+        transition: opacity 0.15s ease;
+      }
+
+      button:active {
+        opacity: 0.72;
+      }
+
+      button.ghost {
+        background: #fff;
+        border-color: var(--border);
+        color: var(--text);
+      }
+
+      button.soft {
+        background: var(--accent-weak);
+        color: var(--accent);
+      }
+
+      button.danger {
+        background: #fff;
+        border-color: #fbd5d5;
+        color: var(--danger);
+      }
+
+      button.small {
+        height: 28px;
+        padding: 0 10px;
+        font-size: 12px;
+        border-radius: 8px;
+      }
+
+      .out {
+        margin: 10px 0 0;
+        padding: 8px 10px;
+        border-radius: 9px;
+        background: #f8f9fb;
+        color: #374151;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 132px;
+        overflow: auto;
+      }
+
+      .out.error {
+        background: #fef2f2;
+        color: var(--danger);
+      }
+
+      .out:empty {
+        display: none;
+      }
+
+      .thumb {
+        display: none;
+        width: 100%;
+        height: 148px;
+        margin-top: 10px;
+        border-radius: 10px;
+        background: #f3f4f6;
+        object-fit: contain;
+      }
+
+      .thumb.show {
+        display: block;
+      }
+
+      .progress {
+        display: none;
+        height: 6px;
+        margin-top: 10px;
+        border-radius: 999px;
+        background: #eef0f3;
+        overflow: hidden;
+      }
+
+      .progress.show {
+        display: block;
+      }
+
+      .progress i {
+        display: block;
+        width: 0%;
+        height: 100%;
+        border-radius: 999px;
+        background: var(--accent);
+        transition: width 0.2s ease;
+      }
+
+      /* ---------- 通信日志 ---------- */
+      .console {
+        flex: none;
+        background: var(--console);
+        color: #cbd5e1;
+        border-radius: 16px 16px 0 0;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.16);
+      }
+
+      .console-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+      }
+
+      .console-bar strong {
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        color: #94a3b8;
+        text-transform: uppercase;
+      }
+
+      .console-bar .count {
+        font-size: 10.5px;
+        color: #64748b;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .console-bar .spacer {
+        flex: 1;
+      }
+
+      .console-bar button {
+        height: 26px;
+        padding: 0 9px;
+        border-radius: 7px;
+        background: rgba(148, 163, 184, 0.14);
+        color: #cbd5e1;
+        font-size: 11.5px;
+      }
+
+      .console-body {
+        max-height: 36vh;
+        overflow-y: auto;
+        padding: 0 14px 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+      }
+
+      .console.collapsed .console-body {
+        display: none;
+      }
+
+      .entry {
+        padding: 7px 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.13);
+      }
+
+      .entry:first-child {
+        border-top: none;
+      }
+
+      .entry-head {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 2px;
+      }
+
+      .entry-head .arrow {
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .entry.out .arrow {
+        color: #60a5fa;
+      }
+
+      .entry.in .arrow {
+        color: #34d399;
+      }
+
+      .entry.in.error .arrow {
+        color: #f87171;
+      }
+
+      .entry-head .name {
+        color: #e2e8f0;
+        font-weight: 600;
+      }
+
+      .entry-head .tag {
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: rgba(52, 211, 153, 0.14);
+        color: #6ee7b7;
+        font-size: 10px;
+      }
+
+      .entry.in.error .tag {
+        background: rgba(248, 113, 113, 0.16);
+        color: #fca5a5;
+      }
+
+      .entry-head .time {
+        margin-left: auto;
+        color: #64748b;
+        font-size: 10px;
+      }
+
+      .entry pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+        color: #94a3b8;
+        line-height: 1.5;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: calc(40vh + 34px);
+        transform: translate(-50%, 10px);
+        padding: 8px 14px;
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.9);
+        color: #fff;
+        font-size: 12.5px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        max-width: 80vw;
+        text-align: center;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      ::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">JB</div>
+        <div>
+          <h1>JSBridge Demo</h1>
+          <p id="channel">正在检测容器通道…</p>
+        </div>
+      </div>
+      <span class="status" id="status"><i class="dot"></i><span>未就绪</span></span>
+    </header>
+
+    <main>
+      <div class="env" id="env"></div>
+
+      <section>
+        <h2>设备能力</h2>
+        <div class="card">
+          <div class="row">
+            <div class="row-head">
+              <div>
+                <div class="row-title">拨打电话</div>
+                <div class="row-desc">jsbridge.makePhoneCall</div>
+              </div>
+            </div>
+            <div class="controls">
+              <input id="phone" class="mono" value="10086" inputmode="tel" />
+              <button data-action="makePhoneCall">拨打</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="row-head">
+              <div>
+                <div class="row-title">拍照 / 相册</div>
+                <div class="row-desc">jsbridge.takePhoto</div>
+              </div>
+            </div>
+            <div class="controls">
+              <button data-action="takePhoto" data-source="camera">打开相机</button>
+              <button class="ghost" data-action="takePhoto" data-source="library">从相册选择</button>
+            </div>
+            <img class="thumb" id="photo" alt="拍摄结果" />
+            <pre class="out" id="out-takePhoto"></pre>
+          </div>
+
+          <div class="row">
+            <div class="row-head">
+              <div>
+                <div class="row-title">获取定位</div>
+                <div class="row-desc">jsbridge.getLocation</div>
+              </div>
+            </div>
+            <div class="controls">
+              <button data-action="getLocation">获取当前位置</button>
+            </div>
+            <pre class="out" id="out-getLocation"></pre>
+          </div>
+
+          <div class="row">
+            <div class="row-head">
+              <div>
+                <div class="row-title">选择文件</div>
+                <div class="row-desc">jsbridge.chooseFile</div>
+              </div>
+            </div>
+            <div class="controls">
+              <button data-action="chooseFile">选择文件</button>
+            </div>
+            <pre class="out" id="out-chooseFile"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>文件</h2>
+        <div class="card">
+          <div class="row">
+            <div class="row-head">
+              <div>
+                <div class="row-title">预览文件</div>
+                <div class="row-desc">jsbridge.previewFile</div>
+              </div>
+            </div>
+            <div class="controls">
+              <button data-action="previewFile" data-kind="image">预览图片</button>
+              <button class="ghost" data-action="previewFile" data-kind="text">预览文本</button>
+              <button class="ghost" data-action="previewChosen">预览所选文件</button>
+            </div>
+            <pre class="out" id="out-previewFile"></pre>
+          </div>
+
+          <div class="row">
+            <div class="row-head">
+              <div>
+                <div class="row-title">上传文件</div>
+                <div class="row-desc">jsbridge.uploadFile · 进度走 onNativeEvent</div>
+              </div>
+            </div>
+            <div class="controls">
+              <input id="upload-url" class="mono" value="https://httpbin.org/post" />
+            </div>
+            <div class="controls">
+              <button data-action="uploadFile">上传所选文件</button>
+              <button class="ghost" data-action="chooseAndUpload">选择并上传</button>
+            </div>
+            <div class="progress" id="upload-progress"><i></i></div>
+            <pre class="out" id="out-uploadFile"></pre>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>WebView</h2>
+        <div class="card">
+          <div class="row">
+            <div class="controls" style="margin-top: 0">
+              <button class="soft" data-action="getSafeArea">安全区域</button>
+              <button class="soft" data-action="canIUse">能力检测</button>
+              <button class="danger" data-action="close">关闭页面</button>
+            </div>
+            <pre class="out" id="out-webview"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="console" id="console">
+      <div class="console-bar">
+        <strong>通信日志</strong>
+        <span class="count" id="count">0</span>
+        <span class="spacer"></span>
+        <button id="clear">清空</button>
+        <button id="toggle">收起</button>
+      </div>
+      <div class="console-body" id="log"></div>
+    </section>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      /* ==========================================================================
+       * 1. @wapri/gjsbridge 的精简实现
+       *    行为与原 SDK 保持一致：requestId 事务、超时、BridgeError、事件订阅、
+       *    按通道形状自动识别 iOS / Android（鸿蒙与 Android 同构）。
+       * ========================================================================== */
+      (function () {
+        'use strict';
+
+        var DEFAULT_TIMEOUT = 10000;
+
+        /** Native 返回 code !== 0 时抛出的错误。 */
+        function BridgeError(code, message) {
+          var error = new Error(message);
+          error.name = 'BridgeError';
+          error.code = code;
+          return error;
+        }
+
+        /** 业务方法 -> Native 方法（对应 SDK 的 apiRegistry）。 */
+        var apiRegistry = {
+          canIUse: { nativeMethod: 'permission.caniuse' },
+          getSafeArea: { nativeMethod: 'getSafeArea' },
+          close: { nativeMethod: 'closeWebview' },
+          makePhoneCall: { nativeMethod: 'makePhoneCall' },
+          takePhoto: { nativeMethod: 'takePhoto', timeout: 120000 },
+          chooseFile: { nativeMethod: 'chooseFile', timeout: 120000 },
+          getLocation: { nativeMethod: 'getLocation', timeout: 30000 },
+          previewFile: { nativeMethod: 'previewFile', timeout: 120000 },
+          uploadFile: { nativeMethod: 'uploadFile', timeout: 120000 },
+          getAppInfo: { nativeMethod: 'getAppInfo' },
+        };
+
+        /** iOS 按方法名取 messageHandlers，Android / 鸿蒙走 JSBridge.handle。 */
+        function getTransport(method) {
+          var handlers = window.webkit && window.webkit.messageHandlers;
+          var iosHandler = handlers && handlers[method];
+
+          if (iosHandler && typeof iosHandler.postMessage === 'function') {
+            return function (request) {
+              iosHandler.postMessage(
+                JSON.stringify({ params: request.params, requestId: request.requestId })
+              );
+            };
+          }
+
+          var native = window.JSBridge;
+          if (native && typeof native.handle === 'function') {
+            return function (request) {
+              native.handle(JSON.stringify(request));
+            };
+          }
+
+          return undefined;
+        }
+
+        function detectChannel() {
+          var handlers = window.webkit && window.webkit.messageHandlers;
+          if (handlers && handlers.getSafeArea) return 'iOS · webkit.messageHandlers';
+          if (window.JSBridge && typeof window.JSBridge.handle === 'function') {
+            return 'Android / 鸿蒙 · JSBridge.handle';
+          }
+          return undefined;
+        }
+
+        var pending = new Map();
+        var listeners = new Map();
+        var sequence = 0;
+        var debug = false;
+
+        function onNativeMessage(raw) {
+          var response;
+          try {
+            response = JSON.parse(raw);
+          } catch (error) {
+            return;
+          }
+
+          if (!response || typeof response.requestId !== 'string') return;
+
+          var entry = pending.get(response.requestId);
+          if (!entry) return;
+
+          pending.delete(response.requestId);
+          clearTimeout(entry.timer);
+
+          if (Number(response.code) === 0) {
+            entry.resolve(response.data);
+          } else {
+            entry.reject(
+              BridgeError(Number(response.code), response.message || 'Native 调用失败')
+            );
+          }
+        }
+
+        function onNativeEvent(eventName, data) {
+          var eventListeners = listeners.get(eventName);
+          if (!eventListeners) return;
+
+          var payload = data;
+          if (typeof data === 'string') {
+            try {
+              payload = JSON.parse(data);
+            } catch (error) {
+              payload = data;
+            }
+          }
+
+          eventListeners.forEach(function (listener) {
+            listener(payload);
+          });
+        }
+
+        function call(businessMethod, params, options) {
+          var config = apiRegistry[businessMethod] || {};
+          var method = config.nativeMethod || businessMethod;
+          var transport = getTransport(method);
+
+          if (!transport) {
+            return Promise.reject(new Error('Native 通道未就绪（' + method + '）'));
+          }
+
+          sequence += 1;
+          var requestId = 'BridgeHandle' + Date.now() + sequence;
+          var request = { method: method, params: params || {}, requestId: requestId };
+          var timeout = (options && options.timeout) || config.timeout || DEFAULT_TIMEOUT;
+
+          if (debug) {
+            console.log('[jsbridge] JS -> Native', JSON.stringify(request));
+          }
+
+          return new Promise(function (resolve, reject) {
+            var timer = setTimeout(function () {
+              pending.delete(requestId);
+              reject(new Error('Native 请求超时'));
+            }, timeout);
+
+            pending.set(requestId, { resolve: resolve, reject: reject, timer: timer });
+
+            try {
+              transport(request);
+            } catch (error) {
+              pending.delete(requestId);
+              clearTimeout(timer);
+              reject(error instanceof Error ? error : new Error('Native 调用失败'));
+            }
+          });
+        }
+
+        var bridge = {};
+
+        Object.keys(apiRegistry).forEach(function (businessMethod) {
+          bridge[businessMethod] = function (params, options) {
+            return call(businessMethod, params, options);
+          };
+        });
+
+        bridge.on = function (eventName, listener) {
+          var set = listeners.get(eventName) || new Set();
+          set.add(listener);
+          listeners.set(eventName, set);
+          return function () {
+            set.delete(listener);
+          };
+        };
+
+        bridge.once = function (eventName, listener) {
+          var off = bridge.on(eventName, function (data) {
+            off();
+            listener(data);
+          });
+          return off;
+        };
+
+        bridge.off = function (eventName, listener) {
+          var set = listeners.get(eventName);
+          if (set) set.delete(listener);
+        };
+
+        bridge.webReady = function () {
+          return Boolean(detectChannel());
+        };
+
+        bridge.setDebug = function (value) {
+          debug = Boolean(value);
+        };
+
+        bridge.channelName = detectChannel;
+
+        window.onNativeMessage = onNativeMessage;
+        window.onNativeEvent = onNativeEvent;
+        window.jsbridge = bridge;
+        window.BridgeError = BridgeError;
+      })();
+
+      /* ==========================================================================
+       * 2. Demo UI
+       * ========================================================================== */
+      (function () {
+        'use strict';
+
+        var bridge = window.jsbridge;
+        var entryCount = 0;
+        var chosenFile = null;
+
+        var $ = function (id) {
+          return document.getElementById(id);
+        };
+
+        var SAMPLES = {
+          image: {
+            url: 'https://picsum.photos/seed/wapri/1200/800',
+            name: 'sample.jpg',
+            mimeType: 'image/jpeg',
+          },
+          text: {
+            url: 'https://raw.githubusercontent.com/sdmu-gaoqi/wapri/main/README.md',
+            name: 'README.md',
+            mimeType: 'text/markdown',
+          },
+        };
+
+        /* ---------- 日志 ---------- */
+        function escapeHtml(text) {
+          return String(text).replace(/[&<>"]/g, function (char) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char];
+          });
+        }
+
+        function stringify(value) {
+          if (value === undefined) return 'undefined';
+          var text = typeof value === 'string' ? value : JSON.stringify(value);
+          if (!text) return String(value);
+          return text.length > 900 ? text.slice(0, 900) + ' …' : text;
+        }
+
+        function stamp() {
+          var now = new Date();
+          return (
+            String(now.getHours()).padStart(2, '0') +
+            ':' +
+            String(now.getMinutes()).padStart(2, '0') +
+            ':' +
+            String(now.getSeconds()).padStart(2, '0')
+          );
+        }
+
+        function log(direction, title, payload, extra) {
+          var container = $('log');
+          var entry = document.createElement('div');
+          entry.className = 'entry ' + direction + (extra && extra.error ? ' error' : '');
+
+          var head = document.createElement('div');
+          head.className = 'entry-head';
+          head.innerHTML =
+            '<span class="arrow">' +
+            (direction === 'out' ? '&rarr;' : '&larr;') +
+            '</span>' +
+            '<span class="name">' +
+            escapeHtml(title) +
+            '</span>' +
+            (extra && extra.tag
+              ? '<span class="tag">' + escapeHtml(extra.tag) + '</span>'
+              : '') +
+            '<span class="time">' +
+            stamp() +
+            '</span>';
+
+          var body = document.createElement('pre');
+          body.textContent = stringify(payload);
+
+          entry.appendChild(head);
+          entry.appendChild(body);
+          container.appendChild(entry);
+
+          entryCount += 1;
+          $('count').textContent = String(entryCount);
+
+          while (container.children.length > 80) {
+            container.removeChild(container.firstChild);
+          }
+
+          container.scrollTop = container.scrollHeight;
+        }
+
+        function toast(message) {
+          var node = $('toast');
+          node.textContent = message;
+          node.classList.add('show');
+          clearTimeout(toast.timer);
+          toast.timer = setTimeout(function () {
+            node.classList.remove('show');
+          }, 1800);
+        }
+
+        function print(id, value, isError) {
+          var node = $(id);
+          if (!node) return;
+          node.textContent = value === undefined ? '' : value;
+          node.classList.toggle('error', Boolean(isError));
+        }
+
+        /* ---------- 调用包装：日志 + 错误展示 ---------- */
+        function run(businessMethod, nativeMethod, params, onSuccess, outputId) {
+          log('out', nativeMethod, params || {});
+
+          return bridge[businessMethod](params).then(
+            function (data) {
+              log('in', nativeMethod, data, { tag: 'code 0' });
+              if (onSuccess) onSuccess(data);
+              return data;
+            },
+            function (error) {
+              var payload = {
+                code: error && error.code !== undefined ? error.code : null,
+                message: error && error.message ? error.message : String(error),
+              };
+              log('in', nativeMethod, payload, {
+                error: true,
+                tag: error && error.code !== undefined ? 'code ' + error.code : 'error',
+              });
+              toast(payload.message);
+              if (outputId) print(outputId, payload.message, true);
+              throw error;
+            }
+          );
+        }
+
+        /* ---------- 环境信息 ---------- */
+        var bootAttempts = 0;
+        var appInfoLoaded = false;
+
+        function bootstrap() {
+          bootAttempts += 1;
+
+          var ready = bridge.webReady();
+          var status = $('status');
+          status.classList.toggle('ready', ready);
+          status.querySelector('span').textContent = ready ? '通道就绪' : '未注入容器';
+
+          var channel = bridge.channelName();
+          $('channel').textContent = channel || '未检测到 Native 通道';
+
+          var env = window.__BRIDGE_ENV__;
+          var chips = [];
+          if (env && env.platform) chips.push('platform: ' + env.platform);
+          if (env && env.app) {
+            chips.push(env.app.appName + ' ' + env.app.appVersion);
+            chips.push(env.app.osName + ' ' + env.app.osVersion);
+          }
+          chips.push('requestId: BridgeHandle<ts><n>');
+
+          $('env').innerHTML = chips
+            .map(function (text) {
+              return '<span class="chip">' + escapeHtml(text) + '</span>';
+            })
+            .join('');
+
+          if (ready && !appInfoLoaded) {
+            appInfoLoaded = true;
+            run('getAppInfo', 'getAppInfo', {}).catch(function () {});
+          }
+
+          // Android 的通道垫片有可能晚于页面脚本注入，前几次没检测到就退避重试。
+          if (!ready && bootAttempts < 5) {
+            setTimeout(bootstrap, 120 * bootAttempts);
+          }
+        }
+
+        /* ---------- 交互绑定 ---------- */
+        document.addEventListener('click', function (event) {
+          var button = event.target.closest('[data-action]');
+          if (!button) return;
+
+          var action = button.getAttribute('data-action');
+
+          if (action === 'makePhoneCall') {
+            var phoneNumber = $('phone').value.trim();
+            if (!phoneNumber) {
+              toast('请输入号码');
+              return;
+            }
+            run('makePhoneCall', 'makePhoneCall', { phoneNumber: phoneNumber }).then(function () {
+              toast('已交给系统拨号器');
+            }).catch(function () {});
+            return;
+          }
+
+          if (action === 'takePhoto') {
+            var source = button.getAttribute('data-source') || 'camera';
+            run('takePhoto', 'takePhoto', { source: source }, function (asset) {
+              print('out-takePhoto', formatAsset(asset));
+              var image = $('photo');
+              if (asset && asset.thumbnail) {
+                image.src = asset.thumbnail;
+                image.classList.add('show');
+              } else {
+                image.classList.remove('show');
+              }
+            }, 'out-takePhoto').catch(function () {});
+            return;
+          }
+
+          if (action === 'getLocation') {
+            run('getLocation', 'getLocation', {}, function (geo) {
+              print(
+                'out-getLocation',
+                [
+                  'latitude  ' + geo.latitude,
+                  'longitude ' + geo.longitude,
+                  'accuracy  ' + Math.round(geo.accuracy) + ' m',
+                  geo.address ? 'address   ' + geo.address : null,
+                ]
+                  .filter(Boolean)
+                  .join('\n')
+              );
+            }, 'out-getLocation').catch(function () {});
+            return;
+          }
+
+          if (action === 'chooseFile') {
+            run('chooseFile', 'chooseFile', {}, function (asset) {
+              chosenFile = asset;
+              print('out-chooseFile', formatAsset(asset));
+            }, 'out-chooseFile').catch(function () {});
+            return;
+          }
+
+          if (action === 'previewFile') {
+            var kind = button.getAttribute('data-kind');
+            var sample = SAMPLES[kind];
+            run('previewFile', 'previewFile', sample, function (result) {
+              print('out-previewFile', 'preview action: ' + result.action);
+            }, 'out-previewFile').catch(function () {});
+            return;
+          }
+
+          if (action === 'previewChosen') {
+            if (!chosenFile) {
+              toast('请先选择一个文件');
+              return;
+            }
+            run('previewFile', 'previewFile', {
+              url: chosenFile.uri,
+              name: chosenFile.name,
+              mimeType: chosenFile.mimeType,
+            }, function (result) {
+              print('out-previewFile', 'preview action: ' + result.action);
+            }, 'out-previewFile').catch(function () {});
+            return;
+          }
+
+          if (action === 'chooseAndUpload' || action === 'uploadFile') {
+            if (action === 'chooseAndUpload') {
+              run('chooseFile', 'chooseFile', {}, function (asset) {
+                chosenFile = asset;
+                print('out-chooseFile', formatAsset(asset));
+              }, 'out-chooseFile').then(upload).catch(function () {});
+            } else {
+              upload();
+            }
+          }
+
+          if (action === 'getSafeArea') {
+            run('getSafeArea', 'getSafeArea', {}, function (safeArea) {
+              print('out-webview', 'safeAreaTop: ' + safeArea.safeAreaTop + '\nsafeAreaBottom: ' + safeArea.safeAreaBottom);
+            }, 'out-webview').catch(function () {});
+            return;
+          }
+
+          if (action === 'canIUse') {
+            run('canIUse', 'permission.caniuse', { api: 'takePhoto' }, function (result) {
+              print('out-webview', 'takePhoto supported: ' + (result.result === '1'));
+            }, 'out-webview').catch(function () {});
+            return;
+          }
+
+          if (action === 'close') {
+            run('close', 'closeWebview', {}).then(function () {
+              toast('Native 已关闭 WebView');
+            }).catch(function () {});
+          }
+        });
+
+        function upload() {
+          if (!chosenFile) {
+            toast('请先选择一个文件');
+            return;
+          }
+
+          var url = $('upload-url').value.trim();
+          if (!url) {
+            toast('请填写上传地址');
+            return;
+          }
+
+          var bar = $('upload-progress');
+          bar.classList.add('show');
+          bar.firstElementChild.style.width = '0%';
+          print('out-uploadFile', '上传中…');
+
+          run('uploadFile', 'uploadFile', {
+            url: url,
+            filePath: chosenFile.uri,
+            fileName: chosenFile.name,
+            mimeType: chosenFile.mimeType,
+            fieldName: 'file',
+          }, function (result) {
+            print(
+              'out-uploadFile',
+              'status ' + result.status + ' · ' + result.size + ' bytes · ' + result.durationMs + 'ms\n' +
+                String(result.body || '').slice(0, 400)
+            );
+            bar.firstElementChild.style.width = '100%';
+            setTimeout(function () {
+              bar.classList.remove('show');
+            }, 800);
+          }, 'out-uploadFile').catch(function () {
+            bar.classList.remove('show');
+          });
+        }
+
+        function formatAsset(asset) {
+          if (!asset) return 'undefined';
+          return [
+            'uri       ' + asset.uri,
+            'name      ' + asset.name,
+            'mimeType  ' + asset.mimeType,
+            'size      ' + asset.size + ' bytes',
+            asset.width ? 'size      ' + asset.width + '×' + asset.height : null,
+          ]
+            .filter(Boolean)
+            .join('\n');
+        }
+
+        /* ---------- 事件通道：上传进度 ---------- */
+        bridge.on('uploadProgress', function (payload) {
+          if (!payload) return;
+          var bar = $('upload-progress');
+          bar.classList.add('show');
+          bar.firstElementChild.style.width = Math.max(0, Math.min(100, payload.percent)) + '%';
+        });
+
+        $('clear').addEventListener('click', function () {
+          $('log').innerHTML = '';
+          entryCount = 0;
+          $('count').textContent = '0';
+        });
+
+        $('toggle').addEventListener('click', function (event) {
+          var consoleNode = $('console');
+          var collapsed = consoleNode.classList.toggle('collapsed');
+          event.target.textContent = collapsed ? '展开' : '收起';
+        });
+
+        bootstrap();
+      })();
+    </script>
+  </body>
+</html>
