@@ -146,7 +146,8 @@ npm run check         # typecheck + lint + format:check
 - **oxlint**：`.oxlintrc.json` 通过 `extends` 引用 `@wagq/lint-ox/oxlint/react.json`（typescript / unicorn / react / jsx-a11y / import / nextjs），并补了 Expo 的忽略目录（`.expo`、`android`、`ios`、`dist`）。oxlint 的 `extends` 只认相对配置文件的路径，所以写成 `./node_modules/...`。
 - **oxfmt**：包里没有 `extends`，直接在脚本里用 `-c ./node_modules/@wagq/lint-ox/oxfmt.json` 指定。参数与团队一致：120 列、单引号、无分号、`singleAttributePerLine`。
 - **`.prettierignore`**：oxfmt 默认读取 `.gitignore` 与 `.prettierignore`，用它把 `assets/web/` 排掉——那份 H5 演示页是手工排版的紧凑写法，`singleAttributePerLine` 会把每个标签摊成多行，反而难读。
-- **编辑器**：装 Oxc 扩展 `oxc.oxc-vscode`，`.vscode/settings.json` 已配好默认格式化器与保存时修复。
+- **编辑器**：装 Oxc 扩展 `oxc.oxc-vscode`。`.vscode/settings.json` 里 `editor.defaultFormatter` 指向它，并用 `oxc.fmt.configPath` 把格式化配置也指向 `./node_modules/@wagq/lint-ox/oxfmt.json` —— 不指向的话，扩展会退回 oxfmt 默认风格（分号、双引号、80 列），跟 CLI 打架。
+- **换行符**：`.gitattributes` 固定 `eol=lf`，与 oxfmt 的 `endOfLine: "lf"` 对齐；否则 Windows 上 `core.autocrlf` 检出成 CRLF，`format:check` 必挂。
 
 新增依赖走 `npm i -D`；`oxlint` / `oxfmt` 的版本要落在 `@wagq/lint-ox` 的 peer 范围内（当前 `oxlint ^1.90`、`oxfmt ^0.75`），升级本包时一并升。
 
